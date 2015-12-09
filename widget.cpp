@@ -1,0 +1,147 @@
+#include "widget.h"
+#include "ui_widget.h"
+#include <QtWidgets>
+#include <QtDebug>
+
+Widget::Widget(QWidget *parent) :
+    QWidget(parent),
+    ui(new Ui::Widget)
+{
+    ui->setupUi(this);
+    xlsx=NULL;
+}
+
+Widget::~Widget()
+{
+    delete ui;
+    if(xlsx!=NULL) delete xlsx;
+    xlsx = NULL;
+}
+
+void Widget::on_pushButton_select_excel_clicked()
+{
+    QString fpath = QFileDialog::getOpenFileName(this,
+        tr("Open xlsx"), QDir::currentPath(), tr("Excel Files (*.xlsx *.xls)"));
+    if (QFile::exists(fpath)) {
+        ui->lineEdit_excel_path->setText(fpath);
+    }
+}
+
+QString Widget::numberToAlpha(int number, bool isLower = false)
+{
+    QString returnVal = "";
+    char c = isLower ? 'a'-1 : 'A'-1;
+    while (number >= 0)
+    {
+        returnVal = (char)(c + number % 26) + returnVal;
+        number /= 26;
+        number--;
+    }
+
+    return returnVal;
+}
+void Widget::on_comboBox_select_tab_currentIndexChanged(const QString &arg1)
+{
+    xlsx->selectSheet(ui->comboBox_select_tab->currentText());
+    qInfo() << "select sheet: " << ui->comboBox_select_tab->currentText();
+    /*update columns*/
+    //找第一個row最後一個有元素的column，決定column數量
+    int n_cols = 0;
+    for (int col=1;col<=100;col++) {
+        QString elem = xlsx->read(1,col).toString();
+        if (!elem.isEmpty()) {
+            n_cols = col;
+        }
+    }
+    qInfo() << "n_cols=" << n_cols;
+    //
+    ui->listWidget_show->clear();
+    ui->listWidget_filename->clear();
+    for (int col=1;col<=n_cols;col++) {
+        QString alpha = numberToAlpha(col);
+        ui->listWidget_show->addItem(alpha);
+        ui->listWidget_filename->addItem(alpha);
+    }
+    /* 更新總數 */
+    int n_rows = 0;
+    for (int row=1;row<3000;row++) {
+        QString elem = xlsx->read(row,1).toString();
+        if (!elem.isEmpty()) {
+            n_rows = row;
+        }
+    }
+    qInfo() << "n_rows=" << n_rows;
+    ui->lineEdit_total->setText(QString::number(n_rows));
+    /* 題號重新開始 */
+    ui->spinBox_No->setMaximum(n_rows);
+    ui->spinBox_No->setMinimum(1);
+    ui->spinBox_No->setValue(1);
+    ui->spinBox_No->setEnabled(true);
+}
+
+
+void Widget::on_lineEdit_excel_path_textChanged(const QString &arg1)
+{
+    if(QFile::exists(ui->lineEdit_excel_path->text())){
+        //讀取xml
+        if(xlsx!=NULL) delete xlsx;
+        xlsx = new QXlsx::Document(ui->lineEdit_excel_path->text(),this);
+        //update選項
+        ui->comboBox_select_tab->clear();
+        ui->comboBox_select_tab->insertItems(0,xlsx->sheetNames());
+        //
+        ui->comboBox_select_tab->setFocus();
+        ui->comboBox_select_tab->setEnabled(true);
+        xlsx->selectSheet(ui->comboBox_select_tab->currentText());
+    }else{
+        ui->comboBox_select_tab->clear();
+        ui->comboBox_select_tab->setEnabled(false);
+    }
+}
+
+void Widget::on_pushButton_select_output_dir_clicked()
+{
+    QString dir = QFileDialog::getExistingDirectory(this,tr("Select Output Directory"),QDir::currentPath());
+    ui->label_output_dir->setText(dir);
+}
+void Widget::updateText()
+{
+    //顯示題目
+    QList<QListWidgetItem *> all_item = ui->listWidget_show->selectedItems();
+    QString msg="";
+    for (auto i=all_item.begin();i!=all_item.end();i++) {
+        msg = msg + xlsx->read((*i)->text() + QString::number(ui->spinBox_No->value())).toString() + " ";
+    }
+    ui->label_text->setText(msg);
+}
+void Widget::on_spinBox_No_valueChanged(int arg1)
+{
+    updateText();
+}
+
+void Widget::on_listWidget_show_itemSelectionChanged()
+{
+    updateText();
+}
+void Widget::drawWaveform()
+{
+    QList<QListWidgetItem *> all_item = ui->listWidget_filename->selectedItems();
+    if (all_item.isEmpty()) return;
+    QString ofilename=all_item.first()->text();
+    for (auto i=all_item.begin()+1;i!=all_item.end();i++) {
+        ofilename +=  "_" + xlsx->read((*i)->text() + QString::number(ui->spinBox_No->value())).toString();
+    }
+    ofilename += ".wav";
+    QString opath = ui->label_output_dir->text() + "/" + ofilename;
+    if (QFile::exists(opath)) {
+        QFile fin(opath);
+        fin.open(QFile::ReadOnly);
+        fin.seek(40);//跳過header
+        QByteArray ary = fin.read(4);
+        int nbyte = ary.toInt();
+        short data[nbyte/2];
+        fin.read(static_cast<char*>(data),nbyte);
+        fin.close();
+        //http://www.qcustomplot.com/index.php/tutorials/basicplotting
+    }
+}
