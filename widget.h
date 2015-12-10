@@ -36,6 +36,12 @@ private slots:
 
     void on_pushButton_rec_clicked();
 
+    void on_lineEdit_output_dir_textChanged(const QString &arg1);
+
+    void on_pushButton_go_back_clicked();
+
+    void on_pushButton_go_next_clicked();
+
 private:
     QXlsx::Document *xlsx;
     AudioInput *recorder;

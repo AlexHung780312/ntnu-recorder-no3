@@ -3,15 +3,22 @@
 #include <QtWidgets>
 #include <QtDebug>
 #include <QtMultimedia>
+#include <wavheader.h>
 Widget::Widget(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::Widget)
 {
     ui->setupUi(this);
     xlsx=NULL;
-    ui->widget_waveform->yAxis->setVisible(false);
-    ui->widget_waveform->xAxis->setVisible(false);
+    ui->widget_waveform->yAxis->setVisible(true);
+    ui->widget_waveform->xAxis->setVisible(true);
+    ui->widget_waveform->yAxis->setRange(-1, 1);
+    ui->widget_waveform->xAxis->axisRect()->setRangeDrag(Qt::Horizontal);
     recorder=NULL;
+    ui->pushButton_go_back->setShortcut(QKeySequence(Qt::Key_Left));
+    ui->pushButton_go_next->setShortcut(QKeySequence(Qt::Key_Right));
+    ui->pushButton_rec->setShortcut(QKeySequence(Qt::Key_Space));
+    ui->pushButton_play->setShortcut(QKeySequence(Qt::Key_P));
 }
 
 Widget::~Widget()
@@ -105,7 +112,7 @@ void Widget::on_lineEdit_excel_path_textChanged(const QString &arg1)
 void Widget::on_pushButton_select_output_dir_clicked()
 {
     QString dir = QFileDialog::getExistingDirectory(this,tr("Select Output Directory"),QDir::currentPath());
-    ui->label_output_dir->setText(dir);
+    ui->lineEdit_output_dir->setText(dir);
 }
 void Widget::updateText()
 {
@@ -123,6 +130,8 @@ void Widget::on_spinBox_No_valueChanged(int arg1)
     drawWaveform();
     ui->pushButton_play->setEnabled(true);
     ui->pushButton_rec->setEnabled(true);
+    ui->pushButton_go_back->setEnabled(true);
+    ui->pushButton_go_next->setEnabled(true);
 }
 
 void Widget::on_listWidget_show_itemSelectionChanged()
@@ -133,12 +142,12 @@ QString Widget::getTargetFile()
 {
     QList<QListWidgetItem *> all_item = ui->listWidget_filename->selectedItems();
     if (all_item.isEmpty()) return "";
-    QString ofilename=all_item.first()->text();
+    QString ofilename=xlsx->read(all_item.first()->text()+QString::number(ui->spinBox_No->value())).toString();
     for (auto i=all_item.begin()+1;i!=all_item.end();i++) {
         ofilename +=  "_" + xlsx->read((*i)->text() + QString::number(ui->spinBox_No->value())).toString();
     }
     ofilename += ".wav";
-    return ui->label_output_dir->text() + "/" + ofilename;
+    return ui->lineEdit_output_dir->text() + "/" + ofilename;
 }
 void Widget::drawWaveform()
 {
@@ -147,16 +156,16 @@ void Widget::drawWaveform()
     if (QFile::exists(opath)) {
         QFile fin(opath);
         fin.open(QFile::ReadOnly);
+        fin.seek(-1);
         fin.seek(40);//跳過header
-        QByteArray ary = fin.read(4);
-        unsigned int nbyte = ary.toInt();
+        unsigned int nbyte;
+        fin.read(reinterpret_cast<char *>(&nbyte), 4);
         unsigned int nsample = nbyte / 2;
         QVector<double> x(nsample),y(nsample);
-        Q_ASSERT(nbyte % nsample == 0);
+        //Q_ASSERT(nbyte % nsample == 0);
         {
             short* data = new short[nsample];
             fin.read(reinterpret_cast<char*>(data),nbyte);
-            /* http://www.qcustomplot.com/index.php/tutorials/basicplotting */
             //建立X,Y
             for (unsigned int i=0;i<nsample;i++) {
                 x[i] = i / 16000.0;//單位:秒
@@ -165,14 +174,14 @@ void Widget::drawWaveform()
             delete [] data;
         }
         fin.close();
+        qInfo() << "nsample=" << nsample;
         ui->widget_waveform->addGraph();
         ui->widget_waveform->graph(0)->setData(x,y);
-        ui->widget_waveform->yAxis->setRange(-1, 1);
-        ui->widget_waveform->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
         ui->widget_waveform->replot();
         qInfo() << "replot";
     } else {
         ui->widget_waveform->clearGraphs();
+        ui->widget_waveform->replot();
         qInfo() << "clear Graphs";
     }
 }
@@ -190,6 +199,11 @@ void Widget::on_pushButton_play_clicked()
 
 void Widget::on_pushButton_rec_clicked()
 {
+    ui->pushButton_rec->setEnabled(false);
+    ui->pushButton_play->setEnabled(false);
+    ui->spinBox_No->setEnabled(false);
+    ui->pushButton_go_back->setEnabled(false);
+    ui->pushButton_go_next->setEnabled(false);
     QString opath = getTargetFile();
     qInfo() << "target wav: " << opath;
     if (recorder == NULL)
@@ -200,8 +214,31 @@ void Widget::on_pushButton_rec_clicked()
         QFile fptr(opath);
         fptr.remove();
         recorder->startRecording(opath);
+        ui->pushButton_rec->setIcon(QIcon(":/stop"));
     } else {
         qInfo() << "rec state->stop";
         recorder->terminateRecording();
+        ui->pushButton_rec->setIcon(QIcon(":/rec"));
     }
+    drawWaveform();
+    ui->pushButton_rec->setEnabled(true);
+    ui->pushButton_play->setEnabled(true);
+    ui->spinBox_No->setEnabled(true);
+    ui->pushButton_go_back->setEnabled(true);
+    ui->pushButton_go_next->setEnabled(true);
+}
+
+void Widget::on_lineEdit_output_dir_textChanged(const QString &arg1)
+{
+    drawWaveform();
+}
+
+void Widget::on_pushButton_go_back_clicked()
+{
+    ui->spinBox_No->setValue(std::max(ui->spinBox_No->minimum(),ui->spinBox_No->value()-1));
+}
+
+void Widget::on_pushButton_go_next_clicked()
+{
+    ui->spinBox_No->setValue(std::min(ui->spinBox_No->maximum(),ui->spinBox_No->value()+1));
 }

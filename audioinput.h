@@ -18,6 +18,7 @@ public slots:
 private:
     QAudioInput *audio;
     QFile output;
+    QBuffer buffer;
 };
 
 #endif // AUDIOINPUT_H

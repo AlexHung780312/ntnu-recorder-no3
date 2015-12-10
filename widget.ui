@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>800</width>
-    <height>409</height>
+    <height>600</height>
    </rect>
   </property>
   <property name="font">
@@ -16,7 +16,7 @@
    </font>
   </property>
   <property name="windowTitle">
-   <string>Widget</string>
+   <string>師大錄 三號</string>
   </property>
   <widget class="QLabel" name="label">
    <property name="geometry">
@@ -39,7 +39,7 @@
   <widget class="QPushButton" name="pushButton_select_excel">
    <property name="geometry">
     <rect>
-     <x>150</x>
+     <x>160</x>
      <y>40</y>
      <width>61</width>
      <height>21</height>
@@ -103,34 +103,13 @@
     <string>5.輸出位置(目錄)</string>
    </property>
   </widget>
-  <widget class="QLabel" name="label_output_dir">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>320</y>
-     <width>131</width>
-     <height>21</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <pointsize>14</pointsize>
-    </font>
-   </property>
-   <property name="frameShape">
-    <enum>QFrame::Box</enum>
-   </property>
-   <property name="text">
-    <string/>
-   </property>
-  </widget>
   <widget class="QPushButton" name="pushButton_select_output_dir">
    <property name="enabled">
     <bool>true</bool>
    </property>
    <property name="geometry">
     <rect>
-     <x>150</x>
+     <x>160</x>
      <y>320</y>
      <width>61</width>
      <height>20</height>
@@ -152,9 +131,9 @@
    <property name="geometry">
     <rect>
      <x>260</x>
-     <y>40</y>
-     <width>480</width>
-     <height>120</height>
+     <y>50</y>
+     <width>501</width>
+     <height>211</height>
     </rect>
    </property>
    <property name="font">
@@ -207,14 +186,24 @@
    </property>
    <property name="geometry">
     <rect>
-     <x>290</x>
-     <y>300</y>
-     <width>91</width>
-     <height>81</height>
+     <x>260</x>
+     <y>490</y>
+     <width>90</width>
+     <height>80</height>
     </rect>
    </property>
    <property name="text">
-    <string>REC</string>
+    <string/>
+   </property>
+   <property name="icon">
+    <iconset resource="icons.qrc">
+     <normaloff>:/rec</normaloff>:/rec</iconset>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>64</width>
+     <height>64</height>
+    </size>
    </property>
   </widget>
   <widget class="QPushButton" name="pushButton_play">
@@ -223,14 +212,24 @@
    </property>
    <property name="geometry">
     <rect>
-     <x>390</x>
-     <y>300</y>
-     <width>91</width>
-     <height>81</height>
+     <x>360</x>
+     <y>490</y>
+     <width>90</width>
+     <height>80</height>
     </rect>
    </property>
    <property name="text">
-    <string>PLAY</string>
+    <string/>
+   </property>
+   <property name="icon">
+    <iconset resource="icons.qrc">
+     <normaloff>:/play</normaloff>:/play</iconset>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>64</width>
+     <height>64</height>
+    </size>
    </property>
   </widget>
   <widget class="QLineEdit" name="lineEdit_excel_path">
@@ -238,7 +237,7 @@
     <rect>
      <x>10</x>
      <y>40</y>
-     <width>131</width>
+     <width>141</width>
      <height>21</height>
     </rect>
    </property>
@@ -344,10 +343,55 @@
    <property name="geometry">
     <rect>
      <x>260</x>
-     <y>170</y>
-     <width>481</width>
-     <height>121</height>
+     <y>270</y>
+     <width>500</width>
+     <height>200</height>
     </rect>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="lineEdit_output_dir">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>320</y>
+     <width>141</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="readOnly">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="pushButton_go_back">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>470</x>
+     <y>490</y>
+     <width>81</width>
+     <height>81</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>&lt;=</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="pushButton_go_next">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>560</x>
+     <y>490</y>
+     <width>81</width>
+     <height>81</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>=&gt;</string>
    </property>
   </widget>
  </widget>
@@ -360,6 +404,8 @@
    <container>1</container>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="icons.qrc"/>
+ </resources>
  <connections/>
 </ui>

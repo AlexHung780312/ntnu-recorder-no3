@@ -11,7 +11,6 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = NTNU_Recoder3
 TEMPLATE = app
 CONFIG += warn_off
-
 SOURCES += main.cpp\
         widget.cpp \
     qcustomplot.cpp \
@@ -19,6 +18,10 @@ SOURCES += main.cpp\
 
 HEADERS  += widget.h \
     qcustomplot.h \
-    audioinput.h
+    audioinput.h \
+    wavheader.h
 
 FORMS    += widget.ui
+
+RESOURCES += \
+    icons.qrc
