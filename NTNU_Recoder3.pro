@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui xlsx
+QT       += core gui xlsx printsupport multimedia
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -14,9 +14,11 @@ CONFIG += warn_off
 
 SOURCES += main.cpp\
         widget.cpp \
-    qcustomplot.cpp
+    qcustomplot.cpp \
+    audioinput.cpp
 
 HEADERS  += widget.h \
-    qcustomplot.h
+    qcustomplot.h \
+    audioinput.h
 
 FORMS    += widget.ui

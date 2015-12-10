@@ -2,13 +2,16 @@
 #include "ui_widget.h"
 #include <QtWidgets>
 #include <QtDebug>
-
+#include <QtMultimedia>
 Widget::Widget(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::Widget)
 {
     ui->setupUi(this);
     xlsx=NULL;
+    ui->widget_waveform->yAxis->setVisible(false);
+    ui->widget_waveform->xAxis->setVisible(false);
+    recorder=NULL;
 }
 
 Widget::~Widget()
@@ -117,31 +120,88 @@ void Widget::updateText()
 void Widget::on_spinBox_No_valueChanged(int arg1)
 {
     updateText();
+    drawWaveform();
+    ui->pushButton_play->setEnabled(true);
+    ui->pushButton_rec->setEnabled(true);
 }
 
 void Widget::on_listWidget_show_itemSelectionChanged()
 {
     updateText();
 }
-void Widget::drawWaveform()
+QString Widget::getTargetFile()
 {
     QList<QListWidgetItem *> all_item = ui->listWidget_filename->selectedItems();
-    if (all_item.isEmpty()) return;
+    if (all_item.isEmpty()) return "";
     QString ofilename=all_item.first()->text();
     for (auto i=all_item.begin()+1;i!=all_item.end();i++) {
         ofilename +=  "_" + xlsx->read((*i)->text() + QString::number(ui->spinBox_No->value())).toString();
     }
     ofilename += ".wav";
-    QString opath = ui->label_output_dir->text() + "/" + ofilename;
+    return ui->label_output_dir->text() + "/" + ofilename;
+}
+void Widget::drawWaveform()
+{
+    QString opath = getTargetFile();
+    qInfo() << "target: " << opath;
     if (QFile::exists(opath)) {
         QFile fin(opath);
         fin.open(QFile::ReadOnly);
         fin.seek(40);//跳過header
         QByteArray ary = fin.read(4);
-        int nbyte = ary.toInt();
-        short data[nbyte/2];
-        fin.read(static_cast<char*>(data),nbyte);
+        unsigned int nbyte = ary.toInt();
+        unsigned int nsample = nbyte / 2;
+        QVector<double> x(nsample),y(nsample);
+        Q_ASSERT(nbyte % nsample == 0);
+        {
+            short* data = new short[nsample];
+            fin.read(reinterpret_cast<char*>(data),nbyte);
+            /* http://www.qcustomplot.com/index.php/tutorials/basicplotting */
+            //建立X,Y
+            for (unsigned int i=0;i<nsample;i++) {
+                x[i] = i / 16000.0;//單位:秒
+                y[i] = data[i] / 32768.0;//[-1~1]
+            }
+            delete [] data;
+        }
         fin.close();
-        //http://www.qcustomplot.com/index.php/tutorials/basicplotting
+        ui->widget_waveform->addGraph();
+        ui->widget_waveform->graph(0)->setData(x,y);
+        ui->widget_waveform->yAxis->setRange(-1, 1);
+        ui->widget_waveform->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
+        ui->widget_waveform->replot();
+        qInfo() << "replot";
+    } else {
+        ui->widget_waveform->clearGraphs();
+        qInfo() << "clear Graphs";
+    }
+}
+
+void Widget::on_pushButton_play_clicked()
+{
+    QString opath = getTargetFile();
+    if (!QFile::exists(opath)) {
+        qInfo() << "wave file not found";
+        return;
+    }
+    qInfo() << "play " << opath;
+    QSound::play(opath);
+}
+
+void Widget::on_pushButton_rec_clicked()
+{
+    QString opath = getTargetFile();
+    qInfo() << "target wav: " << opath;
+    if (recorder == NULL)
+        recorder = new AudioInput(this);
+
+    if (recorder->state() != QAudio::ActiveState) {
+        qInfo() << "stop/pause state -> rec";
+        QFile fptr(opath);
+        fptr.remove();
+        recorder->startRecording(opath);
+    } else {
+        qInfo() << "rec state->stop";
+        recorder->terminateRecording();
     }
 }

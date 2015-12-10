@@ -3,7 +3,8 @@
 
 #include <QWidget>
 #include <QtXlsx>
-
+#include <QtMultimedia>
+#include <audioinput.h>
 namespace Ui {
 class Widget;
 }
@@ -15,6 +16,7 @@ class Widget : public QWidget
 public:
     explicit Widget(QWidget *parent = 0);
     QString numberToAlpha(int number, bool isLower);
+    QString getTargetFile();
     ~Widget();
 
 private slots:
@@ -26,11 +28,17 @@ private slots:
 
     void on_spinBox_No_valueChanged(int arg1);
     void updateText();
+    void drawWaveform();
 
     void on_listWidget_show_itemSelectionChanged();
 
+    void on_pushButton_play_clicked();
+
+    void on_pushButton_rec_clicked();
+
 private:
     QXlsx::Document *xlsx;
+    AudioInput *recorder;
     Ui::Widget *ui;
 };
 
