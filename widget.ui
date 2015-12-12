@@ -18,12 +18,16 @@
   <property name="windowTitle">
    <string>師大錄 三號</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="icons.qrc">
+    <normaloff>:/rec</normaloff>:/rec</iconset>
+  </property>
   <widget class="QLabel" name="label">
    <property name="geometry">
     <rect>
      <x>10</x>
      <y>10</y>
-     <width>111</width>
+     <width>181</width>
      <height>21</height>
     </rect>
    </property>
@@ -33,7 +37,7 @@
     </font>
    </property>
    <property name="text">
-    <string>1.選擇檔案(excel)</string>
+    <string>1.選擇檔案(excel,xlsx)</string>
    </property>
   </widget>
   <widget class="QPushButton" name="pushButton_select_excel">
@@ -41,13 +45,14 @@
     <rect>
      <x>160</x>
      <y>40</y>
-     <width>61</width>
+     <width>71</width>
      <height>21</height>
     </rect>
    </property>
    <property name="font">
     <font>
-     <pointsize>14</pointsize>
+     <family>Agency FB</family>
+     <pointsize>9</pointsize>
     </font>
    </property>
    <property name="text">
@@ -89,8 +94,8 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>290</y>
-     <width>111</width>
+     <y>370</y>
+     <width>151</width>
      <height>21</height>
     </rect>
    </property>
@@ -110,14 +115,15 @@
    <property name="geometry">
     <rect>
      <x>160</x>
-     <y>320</y>
-     <width>61</width>
+     <y>400</y>
+     <width>71</width>
      <height>20</height>
     </rect>
    </property>
    <property name="font">
     <font>
-     <pointsize>14</pointsize>
+     <family>Agency FB</family>
+     <pointsize>9</pointsize>
     </font>
    </property>
    <property name="text">
@@ -287,7 +293,7 @@
      <x>10</x>
      <y>150</y>
      <width>71</width>
-     <height>121</height>
+     <height>201</height>
     </rect>
    </property>
    <property name="selectionMode">
@@ -303,7 +309,7 @@
      <x>100</x>
      <y>150</y>
      <width>71</width>
-     <height>121</height>
+     <height>201</height>
     </rect>
    </property>
    <property name="selectionMode">
@@ -353,7 +359,7 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>320</y>
+     <y>400</y>
      <width>141</width>
      <height>21</height>
     </rect>

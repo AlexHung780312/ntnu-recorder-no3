@@ -156,23 +156,20 @@ void Widget::drawWaveform()
     if (QFile::exists(opath)) {
         QFile fin(opath);
         fin.open(QFile::ReadOnly);
-        fin.seek(-1);
-        fin.seek(40);//跳過header
-        unsigned int nbyte;
-        fin.read(reinterpret_cast<char *>(&nbyte), 4);
-        unsigned int nsample = nbyte / 2;
+        qint64 nbyte = fin.size();
+        char* buff = new char[nbyte];
+        fin.read(buff,nbyte);
+
+        Wav_header* wav = reinterpret_cast<Wav_header*>(buff);
+        qint64 nsample = wav->Subchunk2Size / (wav->BitsPerSample) * 8;
         QVector<double> x(nsample),y(nsample);
-        //Q_ASSERT(nbyte % nsample == 0);
-        {
-            short* data = new short[nsample];
-            fin.read(reinterpret_cast<char*>(data),nbyte);
-            //建立X,Y
-            for (unsigned int i=0;i<nsample;i++) {
-                x[i] = i / 16000.0;//單位:秒
-                y[i] = data[i] / 32768.0;//[-1~1]
-            }
-            delete [] data;
+        //建立X,Y
+        for (qint64 i=0;i<nsample;i++) {
+            x[i] = i / 16000.0;//單位:秒
+            //qInfo() << wav->data[i];
+            y[i] = static_cast<double>(wav->data[i]) / 32768.0;//[-1~1]
         }
+        delete [] buff;
         fin.close();
         qInfo() << "nsample=" << nsample;
         ui->widget_waveform->addGraph();
