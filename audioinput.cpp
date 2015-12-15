@@ -1,17 +1,18 @@
 #include "audioinput.h"
 #include <QDebug>
 #include <wavheader.h>
+#include <QMessageBox>
 AudioInput::AudioInput(QObject *parent) : QObject(parent),
-    audio(NULL)
+    audio(NULL),output(NULL)
 {
 
 }
 
 void AudioInput::startRecording(const QString &path){
-    output.setFileName(path);
-    output.open(QIODevice::WriteOnly| QIODevice::Truncate);
+    output = new QFile();
+    output->setFileName(path);
     QAudioFormat settings;
-    settings.setCodec("audio/PCM");
+    settings.setCodec("audio/pcm");
     settings.setSampleRate(16000);
     settings.setSampleSize(16);
     settings.setChannelCount(1);
@@ -20,8 +21,9 @@ void AudioInput::startRecording(const QString &path){
 
     QAudioDeviceInfo info = QAudioDeviceInfo::defaultInputDevice();
     if (!info.isFormatSupported(settings)) {
-        qWarning() << "Default format not supported, trying to use the nearest.";
+        QMessageBox::information(NULL,"info","Default format not supported, trying to use the nearest.");
         settings = info.nearestFormat(settings);
+        //QMessageBox::information(NULL,"info",info.deviceName());
     }
     qInfo() << settings;
     audio=new QAudioInput(settings,this);
@@ -38,12 +40,15 @@ void AudioInput::terminateRecording(){
     fillWavHeader(reinterpret_cast<Wav_header*>(wave),audio->format(),nbyte);
     buffer.seek(640);
     buffer.read(wave+44,nbyte);
-    output.write(wave,sizeof(Wav_header) + nbyte);
+    output->open(QIODevice::WriteOnly| QIODevice::Truncate);
+    output->write(wave,sizeof(Wav_header) + nbyte);
     buffer.seek(0);
     buffer.close();
-    output.close();
+    output->close();
+    delete output;
     delete audio;
     audio=NULL;
+    output=NULL;
 }
 QAudio::State AudioInput::state()
 {

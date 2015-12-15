@@ -151,12 +151,17 @@ QString Widget::getTargetFile()
 }
 void Widget::drawWaveform()
 {
+
     QString opath = getTargetFile();
     qInfo() << "target: " << opath;
     if (QFile::exists(opath)) {
         QFile fin(opath);
         fin.open(QFile::ReadOnly);
         qint64 nbyte = fin.size();
+        if (nbyte < 44){
+            fin.close();
+            return;
+        }
         char* buff = new char[nbyte];
         fin.read(buff,nbyte);
 

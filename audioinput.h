@@ -17,7 +17,7 @@ public slots:
     void terminateRecording();
 private:
     QAudioInput *audio;
-    QFile output;
+    QFile *output;
     QBuffer buffer;
 };
 

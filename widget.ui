@@ -211,6 +211,9 @@
      <height>64</height>
     </size>
    </property>
+   <property name="autoRepeat">
+    <bool>false</bool>
+   </property>
   </widget>
   <widget class="QPushButton" name="pushButton_play">
    <property name="enabled">

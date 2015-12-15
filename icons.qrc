@@ -2,6 +2,6 @@
     <qresource prefix="/">
         <file alias="rec">icon/mic.png</file>
         <file alias="play">icon/play-30619_960_720.png</file>
-        <file alias="stop">icon/stop-normal-red.ico</file>
+        <file alias="stop">icon/stop-normal-red.png</file>
     </qresource>
 </RCC>
