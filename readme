@@ -1,3 +1,10 @@
 1)安裝QtXlsx
 2)編譯專案
 3)部署執行檔時需要複製plugin底下的"platforms"和"audio"目錄
+
+
+1) install QtXlsx
+https://github.com/dbzhang800/QtXlsxWriter
+2) qmake
+   make
+   
